@@ -1,0 +1,10 @@
+---
+title: "Resultados"
+author: "William Barbosa"
+date: '02-12-2023'
+
+---
+```{r,echo =FALSE,message=FALSE, warning=FALSE}
+```
+
+# Tratamentos iniciais
