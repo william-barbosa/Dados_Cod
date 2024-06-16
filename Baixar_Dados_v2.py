@@ -153,11 +153,18 @@ cerrado = cerrado[['geocode', 'Level_1', 1985, 2017]].groupby(['geocode','Level_
           .apply(lambda y: 0 if y > 0 else abs(y))
           )
       ).reset_index(drop=True)\
-        .query("Ano==2017")
+        .query("Ano==2017").assign(
+      geocode = lambda d: d['geocode'].astype(str)
+    ).rename(columns={'geocode':'CD_GEOCMU'})
 
 
 
 cerrado.head(15)
+
+
+
+
+
 
 
 ## Realizar o join entre as bases de desflorestamento e demais variáveis
@@ -165,41 +172,57 @@ cerrado.head(15)
 # Dados do censo
 
 vbp17 = (pd.read_csv('./Dados_V2/VBP17.csv',sep=',',decimal='.')\
-  .rename(columns={'Município (Código)':'geocode','Valor':'VBP17'})
-  [['geocode', 'VBP17']])
+  .rename(columns={'Município (Código)':'geocode','Valor':'VBP17'})\
+    .assign(
+      VBP17 = lambda d: d['VBP17'].str.replace("-|X", '0', regex=True).astype(float)
+      )[['geocode', 'VBP17']])
 
 vbp06 = (pd.read_csv('./Dados_V2/VBP06.csv',sep=',',decimal='.')\
-  .rename(columns={'Município (Código)':'geocode','Valor':'VBP06'})
-          [['geocode', 'VBP06']])
+  .rename(columns={'Município (Código)':'geocode','Valor':'VBP06'})\
+    .assign(
+      VBP06 = lambda d: d['VBP06'].str.replace("-|X", '0', regex=True).astype(float)
+    )[['geocode', 'VBP06']])
 
 agrotoxico = (pd.read_csv('./Dados_V2/agrotoxico.csv',sep=',',decimal='.')\
-  .rename(columns={'Município (Código)':'geocode','Valor':'AGROTOXICO'})
-          [['geocode', 'AGROTOXICO']])
+  .rename(columns={'Município (Código)':'geocode','Valor':'AGROTOXICO'})\
+    .assign(
+      AGROTOXICO = lambda d: d['AGROTOXICO'].str.replace("-|X", '0', regex=True).astype(float)
+    )[['geocode', 'AGROTOXICO']])
 
 irrigacao = (pd.read_csv('./Dados_V2/area_irrigada_hect.csv',sep=',',decimal='.')\
-  .rename(columns={'Município (Código)':'geocode','Valor':'IRRIGACAO'})
-          [['geocode', 'IRRIGACAO']])
+  .rename(columns={'Município (Código)':'geocode','Valor':'IRRIGACAO'})\
+    .assign(
+      IRRIGACAO = lambda d: d['IRRIGACAO'].str.replace("-|X", '0', regex=True).astype(float)
+    )[['geocode', 'IRRIGACAO']])
 
 area_agropec = (pd.read_csv('./Dados_V2/areaHec_agropec.csv',sep=',',decimal='.')\
-  .rename(columns={'Município (Código)':'geocode','Valor':'AREA_AGROPEC'})
-          [['geocode', 'AREA_AGROPEC']])
+  .rename(columns={'Município (Código)':'geocode','Valor':'AREA_AGROPEC'})\
+    .assign(
+      AREA_AGROPEC = lambda d: d['AREA_AGROPEC'].str.replace("-|X", '0', regex=True).astype(float)
+    )[['geocode', 'AREA_AGROPEC']])
 
 assist_tec = (pd.read_csv('./Dados_V2/assist_tec.csv',sep=',',decimal='.')\
-  .rename(columns={'Município (Código)':'geocode','Valor':'ASSIST_TEC'})
-          [['geocode', 'ASSIST_TEC']])
+  .rename(columns={'Município (Código)':'geocode','Valor':'ASSIST_TEC'})\
+    .assign(
+      ASSIST_TEC = lambda d: d['ASSIST_TEC'].str.replace("-|X", '0', regex=True).astype(float)
+    )[['geocode', 'ASSIST_TEC']])
 
 bens_equip = (pd.read_csv('./Dados_V2/bens_equip.csv',sep=',',decimal='.')\
-  .rename(columns={'Município (Código)':'geocode','Valor':'BENS_EQUIP'})
-          [['geocode', 'BENS_EQUIP']])
+  .rename(columns={'Município (Código)':'geocode','Valor':'BENS_EQUIP'})\
+    .assign(
+      BENS_EQUIP = lambda d: d['BENS_EQUIP'].str.replace("-|X", '0', regex=True).astype(float)
+    )[['geocode', 'BENS_EQUIP']])
 
 correcao_solo = (pd.read_csv('./Dados_V2/correcao_solo.csv',sep=',',decimal='.')\
-  .rename(columns={'Município (Código)':'geocode','Valor':'CORRECAO_SOLO'})
-          [['geocode', 'CORRECAO_SOLO']])
+  .rename(columns={'Município (Código)':'geocode','Valor':'CORRECAO_SOLO'})\
+    .assign(
+       CORRECAO_SOLO = lambda d: d['CORRECAO_SOLO'].str.replace("-|X", '0', regex=True).astype(float)
+    )[['geocode', 'CORRECAO_SOLO']])
 
 credito = (pd.read_csv('./Dados_V2/credito.csv',sep=',',decimal='.')\
   .rename(columns={'Município (Código)':'geocode','Valor':'CREDITO'})\
     .assign(
-      CREDITO = lambda d: d['CREDITO'].str.replace("-", '0', regex=True).astype(float),
+      CREDITO = lambda d: d['CREDITO'].str.replace("-|X", '0', regex=True).astype(float),
       # CREDITO = lambda d: d['CREDITO'].replace("-", np.nan, regex=True).replace("", np.nan).astype(float)
     )\
       .groupby('geocode',as_index=False).agg(
@@ -207,35 +230,45 @@ credito = (pd.read_csv('./Dados_V2/credito.csv',sep=',',decimal='.')\
       [['geocode', 'CREDITO']])
 
 trabalho = (pd.read_csv('./Dados_V2/trabalho.csv',sep=',',decimal='.')\
-  .rename(columns={'Município (Código)':'geocode','Valor':'TRABALHO'})
-          [['geocode', 'TRABALHO']])
+  .rename(columns={'Município (Código)':'geocode','Valor':'TRABALHO'})\
+    .assign(
+      TRABALHO = lambda d: d['TRABALHO'].str.replace("-|X", '0', regex=True).astype(float)
+    )[['geocode', 'TRABALHO']])
 
 area_municipal = (pd.read_csv('./Dados_V2/area_municipal.csv',sep=',',decimal='.')\
-  .rename(columns={'Município (Código)':'geocode','Valor':'AREA_MUNI'})
-          [['geocode', 'AREA_MUNI']])
+  .rename(columns={'Município (Código)':'geocode','Valor':'AREA_MUNI'})#\
+    # .assign(
+    #   AREA_MUNI = lambda d: d['AREA_MUNI'].str.replace("-|X", '0', regex=True).astype(float)
+    # )
+    [['geocode', 'AREA_MUNI']])
 
 despesas_tot = (pd.read_csv('./Dados_V2/despesas_totais.csv',sep=',',decimal='.')\
-  .rename(columns={'Município (Código)':'geocode','Valor':'DESP_TOT'})
-          [['geocode', 'DESP_TOT']])
+  .rename(columns={'Município (Código)':'geocode','Valor':'DESP_TOT'})\
+    .assign(
+      DESP_TOT = lambda d: d['DESP_TOT'].str.replace("-|X", '0', regex=True).astype(float)
+    )[['geocode', 'DESP_TOT']])
 
-
-#CONFERIR AQUI E SOMAR AS LINHAS QUE ESTÃO A MAIS
 despesas_novas_pastagens = (pd.read_csv('./Dados_V2/despesas_novas_pastagens.csv',sep=',',decimal='.')\
-  .rename(columns={'Município (Código)':'geocode','Valor':'DESP_PAST'})
+  .rename(columns={'Município (Código)':'geocode','Valor':'DESP_PAST'})\
+    .assign(
+      DESP_PAST = lambda d: d['DESP_PAST'].str.replace("-|X", '0', regex=True).astype(float)
+    )\
+    .groupby('geocode',as_index=False).agg(
+        DESP_PAST = ('DESP_PAST', 'sum'))
           [['geocode', 'DESP_PAST']])
 
 
-lista_df = [vbp17, vbp06, agrotoxico, irrigacao, area_agropec, assist_tec, bens_equip]#,
-            # correcao_solo, credito, trabalho, area_municipal, despesas_tot, despesas_novas_pastagens]
+lista_df = [vbp17, vbp06, agrotoxico, irrigacao, area_agropec, assist_tec, bens_equip, correcao_solo, credito, trabalho, area_municipal, despesas_tot, despesas_novas_pastagens]
 
-dados_final = reduce(left_join, lista_df)
+dados_final = reduce(left_join, lista_df)\
+  .rename(columns={'geocode':'CD_GEOCMU'})\
+    .assign(
+      # CD_GEOCMU = lambda d: d['CD_GEOCMU'].astype(chr)
+      CD_GEOCMU = lambda d: d['CD_GEOCMU'].astype(str)
+    )
 
-dados_final = pd.merge(cerrado, VBP06.filter(items=['geocode','VBP06']), how='left', on='geocode')
-
-dados_final = pd.merge(cerrado, vbp17.filter(items=['geocode','VBP17']), how='left', on='geocode')
-
-
-UU = lista_df[1].shape(0)
+len(dados_final)
+dados_final.shape
 
 # Verifica o total de linhas que cada um dos df possui antes de realizar o join.
 [len(df) for df in lista_df]
@@ -244,26 +277,176 @@ UU = lista_df[1].shape(0)
 cerrado.to_csv('./Dados_V2/teste.csv',sep=',',decimal='.',encoding='UTF-8',index=False)
 
 
-resultado = []
-for coluna in range(0,len(lista_df)):
-  res = lista_df[coluna].shape(0)
-  resultado.append(res)
-
-len(resultado[3])
-
-vbp['Tipo de produção (Código)'].unique()
-
-
 ###########
 
+# def verificar_faltantes(x, y):
+#   X = x.groupby('geocode').size().reset_index(name='counts_X').sort_values(by='counts_X', ascending=False)
+#   Y =y.groupby('geocode').size().reset_index(name='counts_Y').sort_values(by='counts_Y', ascending=False)
+
+#   # Realizar o left join
+#   final = X.merge(Y, on='geocode', how='left')
+
+#   # Filtrar os casos em que 'counts_Y' está NaN (não há correspondência)
+#   faltantes = final[final['counts_Y'].isna()]
+
+#   return faltantes
 
 
-Cerrado.assign(sepal_length_ranges = Cerrado['2015'].apply('2015') )
+# verificar_faltantes(area_municipal,despesas_novas_pastagens)
 
-Cerrado.assign( teste = Cerrado[2015] / Cerrado[2016])
+# # Verificar o total de municipior pertencentes ao cerrado
+
+# cerrado[['CD_GEOCMU']].nunique()
+
+# area_municipal[['geocode']].nunique()
+
+
+# dados_final.query("CD_GEOCMU == '3538907'")
+# Cerrado.query("geocode == 3538907")
+# shp.query("CD_GEOCMU == 3500600")
+# OS dois municipios faltantes não estão no shp!
+# '3500600', '3538907'
+
+################################################################################
+###                     Tratamento de dados espaciais                       ####
+################################################################################
+
+import geopandas as gpd
+
+dados_final['CD_GEOCMU'].dtype
+
+# Caminho para o seu arquivo .shp
+shp_file_path = 'C:/Users/William/Documents/Monografia_Pecege/Mapas/br_municipios/BRMUE250GC_SIR.shp'
+
+# Importando o arquivo .shp
+shp = gpd.read_file(shp_file_path)
+
+# Realiza o join entre o shp e a base de dados
+# shp_final = shp_final[~shp_final['CD_GEOCMU'].isin([3518701, 3520400,2605459])]
+
+shp_final = shp.merge(dados_final, on='CD_GEOCMU')\
+  .query("CD_GEOCMU not in [3518701, 3520400, 2605459]")
+
+shp_final = shp_final.merge(cerrado,on='CD_GEOCMU')
+
+# Filtrando somente os municípios do Cerrado
+cerrado_mun = UF.assign(
+  CD_GEOCMU = lambda d: d['CD_Muni'].astype(str)
+  )['CD_GEOCMU'].unique() # Lista de municípios pertencentes ao Cerrado
+
+# Apenas dois municípios não estão na lista final
+set(shp_final1['CD_GEOCMU']).symmetric_difference(cerrado_mun)
+
+# SHP final
+shp_final1 = shp_final[shp_final['CD_GEOCMU'].isin(cerrado_mun)]
+
+shp_final1 = shp_final1.drop('Ano',axis=1)
+
+# Salvando o resultado
+shp_final1.to_file('./Dados_V2/SHP/mapa_regressao_vf.shp')
+
+len(np.unique(cerrado[['CD_GEOCMU']]))
+
+for col in shp_final.columns:
+    print(col + ": " + str(shp_final[col].dtype))
+
+len(shp_final[['CD_GEOCMU']])
+
+[len(df) for df in lista_df]
+
+
+# Verificar e retornar o total de NA's em colunas que possuem NA's
+for col in shp_final.columns:
+    na_count = shp_final[col].isna().sum()
+    if na_count > 0:
+        print(f"{col}: {na_count} NA's")
+
+
+shp_final.query('VBP06 != VBP06') # 2 casos = NA
+shp_final.query('IRRIGACAO != IRRIGACAO') # 2 casos = NA
+shp_final.query('CREDITO != CREDITO') # 2 casos = NA
+shp_final.query('tx_desf != tx_desf') # 2 casos = NA
 
 
 
-despesas.query("`Município (Código)` == '1100015'")
-Cerrado.query("geocode == 1100015")
+def plt_na(shp,var):
+  dados = shp.assign(
+      varplot = lambda d: d[var].isna()
+    )
+  color_map = {True: 'red', False: '#0000CD'}
+  dados['color'] = dados['varplot'].map(color_map)
 
+  fig, ax = plt.subplots(1, 1, figsize=(10, 6))
+  dados.plot(ax=ax, color=dados['color'], edgecolor='0.8', linewidth=0.2)
+
+  legend_labels = {'Com NA': 'red', 'Com valor': '#0000CD'}
+  handles = [plt.Line2D([0], [0], marker='o', color='w', markerfacecolor=color, markersize=10, label=label)
+               for label, color in legend_labels.items()]
+  ax.legend(handles=handles, loc='upper left', title='Legenda')
+
+    # Mostrar o plot
+  plt.show()
+
+plt_na(shp_final,'IRRIGACAO')
+plt_na(shp_final,'tx_desf')
+
+## Fazer um loop para criar uma flag que indique NA para cada uma das variáveis e linhas
+
+
+
+################################################################################
+import geopandas as gpd
+import matplotlib.pyplot as plt
+import pysal as py
+from splot.mapping import vba_choropleth as maps
+from matplotlib import colors
+import contextily
+import spreg
+import xlsxwriter
+#from .sqlite import head_to_sql, start_sql
+import os
+import libpysal
+from mlxtend.preprocessing import standardize
+import numpy as np
+
+shp_final.plot()
+plt.show()
+
+# # LISA
+# tx_desf = shp_final['tx_desf']
+# tx_desf_lisa = pygeoda.local_moran(queen_w, tx_desf)
+
+# Início da modelagem
+db = libpysal.io.open('./Dados_V2/SHP/mapa_regressao_vf.dbf','r')
+shp_final = gpd.read_file('./Dados_V2/SHP/mapa_regressao_vf.shp')
+
+db.header
+
+# Matriz queen
+queen_w = pygeoda.queen_weights(shp_final)
+# Criando a matriz de peso espacial
+w = libpysal.weights.Queen.from_shapefile('./Dados_V2/SHP/mapa_regressao_vf.shp')
+w.transform = 'r' # Padroniza na linha, de forma que a soma será 1
+
+
+shp_final['VBP17']
+X = []
+#X.append(db.by_col("IRRIGAC"))
+X.append(shp_final['VBP17'])
+
+x_names = ['VBP17']
+
+# Criando as variáveis
+vr_fl = shp_final["tx_desf"]
+y = np.array(vr_fl)
+y.shape = (len(vr_fl),1)
+
+
+# Estima um OLS com os testes
+
+# Normalizar a matriz
+X0 = X#standardize(X)
+
+ols = spreg.OLS(y,X0,w=w, name_x=x_names, name_y='des1785', name_w = 'Matriz Queen',name_ds='Dados_Desma',spat_diag=True)
+
+print(ols.summary)
