@@ -4,7 +4,7 @@
 ################################################################################
 import pandas as pd
 import numpy as np
-import sidrapy
+#import sidrapy
 import time
 import requests
 from functools import reduce
@@ -162,7 +162,7 @@ cerrado = cerrado[['geocode', 'Level_1', 1985, 2017]].groupby(['geocode','Level_
 cerrado.head(15)
 
 
-
+cerrado.shape
 
 
 
@@ -312,11 +312,12 @@ cerrado.to_csv('./Dados_V2/teste.csv',sep=',',decimal='.',encoding='UTF-8',index
 ################################################################################
 
 import geopandas as gpd
-
+import matplotlib as plt
 dados_final['CD_GEOCMU'].dtype
 
+
 # Caminho para o seu arquivo .shp
-shp_file_path = 'C:/Users/William/Documents/Monografia_Pecege/Mapas/br_municipios/BRMUE250GC_SIR.shp'
+shp_file_path = 'C:/Users/William Barbosa/Documents/Desfl_Cerrado/Dados_V2/SHP/br_municipios/BRMUE250GC_SIR.shp'
 
 # Importando o arquivo .shp
 shp = gpd.read_file(shp_file_path)
@@ -330,12 +331,12 @@ shp_final = shp.merge(dados_final, on='CD_GEOCMU')\
 shp_final = shp_final.merge(cerrado,on='CD_GEOCMU')
 
 # Filtrando somente os municípios do Cerrado
-cerrado_mun = UF.assign(
-  CD_GEOCMU = lambda d: d['CD_Muni'].astype(str)
+cerrado_mun = cerrado[['CD_GEOCMU']].assign(
+  CD_GEOCMU = lambda d: d['CD_GEOCMU'].astype(str)
   )['CD_GEOCMU'].unique() # Lista de municípios pertencentes ao Cerrado
 
 # Apenas dois municípios não estão na lista final
-set(shp_final1['CD_GEOCMU']).symmetric_difference(cerrado_mun)
+set(shp_final['CD_GEOCMU']).symmetric_difference(cerrado_mun)
 
 # SHP final
 shp_final1 = shp_final[shp_final['CD_GEOCMU'].isin(cerrado_mun)]
@@ -367,6 +368,20 @@ shp_final.query('IRRIGACAO != IRRIGACAO') # 2 casos = NA
 shp_final.query('CREDITO != CREDITO') # 2 casos = NA
 shp_final.query('tx_desf != tx_desf') # 2 casos = NA
 
+import matplotlib.pyplot as plt
+
+def count_na_per_row(df):
+    """
+    Conta a quantidade de valores NA em cada linha de um DataFrame.
+
+    Parâmetros:
+    df (DataFrame): O DataFrame a ser verificado.
+
+    Retorna:
+    Series: Uma série com a quantidade de valores NA em cada linha.
+    """
+    #return df.apply(lambda row: row.isna().sum(), axis=1)
+    return df.apply(lambda row: row.isna().all(), axis=1)
 
 
 def plt_na(shp,var):
@@ -392,6 +407,10 @@ plt_na(shp_final,'tx_desf')
 
 ## Fazer um loop para criar uma flag que indique NA para cada uma das variáveis e linhas
 
+na_counts = count_na_per_row(shp_final)
+shp_final['na_counts'] = na_counts
+
+shp_final.query('na_counts != 0')[['NM_MUNICIP',]]
 
 
 ################################################################################
